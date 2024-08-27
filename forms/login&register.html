@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>LOGIN AND REGISTRATION FORM</title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">
+
+  <!-- Favicons -->
+  <link href="../assets/img/favicon.png" rel="icon">
+  <link href="../assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="../assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="../assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="../assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
+  <link href="../assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+  <link href="../assets/vendor/aos/aos.css" rel="stylesheet">
+
+  
+  <link href="../assets/css/main.css" rel="stylesheet">
+  <link href="../assets/css/style.css" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Montserrat', sans-serif;
+}
+body{
+    background-color: #f4f4f4;
+    background: linear-gradient(to , #e2e2e2, #f44336);
+    align-items: center;
+    justify-content: center;
+    height: 130vh;
+}
+.ishimwe-container{
+    background-color: #ffff;
+    border-radius: 30px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
+    position: relative;
+    overflow: hidden;
+    width: 160vh;
+    left: 180px;
+    height: 80vh;
+    max-width: 100%;
+    margin-top: 80px;
+}
+.ishimwe-container p{
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: 0.3px;
+    margin: 20px 0;
+}
+.ishimwe-container span{
+    font-size: 12px;
+}
+.ishimwe-container a{
+    color: #333;
+    font-size: 13px;
+    text-decoration: none;
+    margin: 15px 0 10px;
+}
+.ishimwe-container button{
+    background-color: #333;
+    color: #fff;
+    font-size: 12px;
+    padding: 10px 45px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-top: 10px;
+    cursor: pointer;
+}
+.ishimwe-container button:hover{
+    background-color: #f44336;
+}
+.ishimwe-container button.ishimwe-hidden{
+    background-color: transparent;
+    border-color: #fff;
+}
+.ishimwe-container form{
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 0 40px;
+    height: 100%;
+}
+.ishimwe-container input{
+    background-color: #eee;
+    border: none;
+    margin: 8px 0;
+    padding: 10px 15px;
+    font-size: 13px;
+    border-radius: 8px;
+    width: 100%;
+    outline: none;
+}
+.ishimwe-form-container{
+    position: absolute;
+    top: 0;
+    height: 100%;
+    transition: all 0.6s ease-in-out;
+}
+.ishimwe-sign-in{
+    left: 0;
+    width: 50%;
+    z-index: 2;
+}
+.ishimwe-container.ishimwe-active .ishimwe-sign-in{
+    transform: translateX(100%);
+}
+.ishimwe-sign-up{
+    left: 0;
+    width: 50%;
+    opacity: 0;
+    z-index: 0;
+}
+.ishimwe-container.ishimwe-active .ishimwe-sign-up{
+    transform: translateX(100%);
+    opacity: 1;
+    z-index: 5;
+    animation: ishimwe-move 0.6s;
+}
+@keyframes ishimwe-move{
+    0%, 49.99%{
+        opacity: 0;
+        z-index: 5;
+    }
+    50%, 100%{
+        opacity: 1;
+        z-index: 5;
+    }
+}
+.ishimwe-social-icons{
+    margin: 20px 0;
+}
+
+.ishimwe-social-icons a{
+    border: 1px solid #ccc;
+    border-radius: 20%;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 3px;
+    width: 40px;
+    height: 40px;
+}
+.ishimwe-social-icons a:hover{
+    color: #e03c30;
+    background-color: #333;
+}
+.ishimwe-toggle-container{
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 50%;
+    height: 100%;
+    overflow: hidden;
+    transition: all 0.6s ease-in-out;
+    border-radius: 150px 0 0 100px;
+    z-index: 1000;
+}
+.ishimwe-container.ishimwe-active .ishimwe-toggle-container{
+    transform: translateX(-100%);
+    border-radius: 0 150px 100px 0;
+}
+.ishimwe-toggle{
+    background-color: #f44336;
+    height: 100%;
+    background: linear-gradient(to right, #f44336, #e03c30 );
+    color: #fff;
+    position: relative;
+    left: -100%;
+    height: 100%;
+    width: 200%;
+    transform: translateX(0);
+    transition: all 0.6ss ease-in-out;
+}
+.ishimwe-container.ishimwe-active .ishimwe-toggle{
+    transform: translateX(50%);
+}
+#header, #navmenu {
+    z-index: 1001; /* or a higher value */
+}
+.ishimwe-toggle-panel{
+    position: absolute;
+    width: 50%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 0 30px;
+    text-align: center;
+    top: 0;
+    transform: translateX(0);
+    transition: all 0.6s ease-in-out;
+}
+/* Add this CSS to change the background color of buttons on hover */
+.ishimwe-toggle-panel button.ishimwe-hidden {
+    background-color: #333;
+    transition: background-color 0.3s;
+}
+.ishimwe-toggle-panel button.ishimwe-hidden:hover {
+    background-color: #f44336;
+}
+.ishimwe-toggle-left{
+    transform: translateX(-200%);
+}
+.ishimwe-container.ishimwe-active .ishimwe-toggle-left{
+    transform: translateX(0);
+}
+.ishimwe-toggle-right{
+    right: 0;
+    transform: translateX(0);
+}
+.ishimwe-container.ishimwe-active .ishimwe-toggle-right{
+    transform: translateX(200);
+}
+  </style>
+  
+ 
+</head>
+
+<body class="index-page" data-bs-spy="scroll" data-bs-target="#navmenu">
+
+    <header id="header" class="header fixed-top d-flex align-items-center">
+        <div class="container-fluid d-flex align-items-center justify-content-between">
+    
+          <a href="../index.html" class="logo d-flex align-items-center me-auto me-xl-0">
+             <div class="mylogo">
+            <i class="fas fa-book-open" style="color: #f44336; font-size: 40px; "></i>
+            <h6 id="myHeading" style="font-size: 30px; color: black;">ImBoni</h6>
+    
+           </div>
+          </a>
+    
+          <nav id="navmenu" class="navmenu">
+            <ul>
+              <li><a href="../index.html#hero" class="active" style="color: black;">Home</a></li>
+              <li><a href="../about.html" style="color: black;">About</a></li>
+              <li><a href="../pricing.html" style="color: black;">Pricing</a></li>
+              <li><a href="../prof.html" style="color: black;">Professors</a></li>
+              <li><a href="../team.html" style="color: black;">Team</a></li>
+              <li><a href="../services.html" style="color: black;">Services</a></li>
+              <li class="dropdown has-dropdown" style="color: black;"><a href="../blogpage.html"><span style="color: black;">Blog</span> <i class="bi bi-chevron-down"></i></a>
+                <ul class="dd-box-shadow">
+                  <li><a href="../blogpage.html" style="color: black;">Current Areas</a></li>
+                  <li><a href="../blog.html" style="color: black;">All Blogs</a></li>
+                  <li><a href="#" style="color: black;">View Posts</a></li>
+                 
+            </ul>
+            <li><a href="../contact.html" style="color: black;">Contact</a></li>
+            <li class="dropdown has-dropdown"><a href="#"><span style="color: black;">Language</span> <i class="bi bi-chevron-down"></i></a>
+              <ul class="dd-box-shadow">
+                <li><a href="#">Kinyarwanda</a></li>
+                <li><a href="#">English</a></li>
+                <li><a href="#">French</a></li>
+                <li><a href="#">Kiswahili</a></li>
+          </ul>
+           
+          </nav>
+          <i class="mobile-nav-toggle d-xl-none bi bi-list" style="color: black;"></i>
+          <a class="btn-getstarted" href="../forms/login&register.html">Log In !</a>
+    
+        </div>
+      </header><!-- End Header -->
+  <main id="ishimwe-main">
+    <div class="ishimwe-container" id="ishimwe-container">
+        <div class="ishimwe-form-container ishimwe-sign-up">
+            <form id="signupForm">
+                <h1>Create Account</h1>
+                <div class="ishimwe-social-icons">
+                    <a href="#" class="icon"><i class="fab fa-google-plus-g"></i></a>
+                    <a href="#" class="icon"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="icon"><i class="fab fa-github"></i></a>
+                    <a href="#" class="icon"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+                <span>or use your email for registration</span>
+                <div class="row">
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" placeholder="First Name" required>
+                    </div>
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" placeholder="Last Name" required>
+                    </div>
+                </div>
+                <input type="email" class="form-control" placeholder="Email" required>
+                <input type="password" class="form-control" placeholder="Password" required>
+                <select id="roleSelect" class="form-control" required style="background-color: #eee; cursor: pointer;">
+                    <option value="" disabled selected>Select your role</option>
+                    <option value="teacher">Teacher</option>
+                    <option value="student">Student</option>
+                </select>
+                <button type="submit" style="width: 100%;">Sign Up</button>
+            </form>
+        </div>
+        <div class="ishimwe-form-container ishimwe-sign-in">
+            <form id="ishimwe-signUpForm">
+                <h1>Create Account</h1>
+                <div class="ishimwe-social-icons">
+                    <a href="#" class="icon"><i class="fa-brands fa-google-plus-g"></i></a>
+                    <a href="#" class="icon"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="#" class="icon"><i class="fa-brands fa-github"></i></a>
+                    <a href="#" class="icon"><i class="fa-brands fa-linkedin-in"></i></a>
+                </div>
+               
+           
+            </form>
+        </div>
+        <div class="ishimwe-form-container ishimwe-sign-in">
+            <form id="ishimwe-signInForm">
+                <h1>Sign In</h1>
+                <div class="ishimwe-social-icons">
+                    <a href="#" class="icon"><i class="fa-brands fa-google-plus-g"></i></a>
+                    <a href="#" class="icon"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="#" class="icon"><i class="fa-brands fa-github"></i></a>
+                    <a href="#" class="icon"><i class="fa-brands fa-linkedin-in"></i></a>
+                </div>
+                <span>or use your email password</span>
+                <input type="email"  class="form-control" placeholder="Email" required>
+                <input type="password"  class="form-control" placeholder="Password" required>
+                <a href="#">Forgot your password?</a>
+                <button type="submit" style="width: 100%;">Sign In</button>
+            </form>
+        </div>
+        <div class="ishimwe-toggle-container">
+            <div class="ishimwe-toggle">
+                <div class="ishimwe-toggle-panel ishimwe-toggle-left">
+                    <h1 style="color: white;">Welcome Back!</h1>
+                    <p>Enter your personal details to use all of site features and get satisfies while using IMBONI </p>
+                    <p>Already have an account?</p>
+                    <button class="ishimwe-hidden" id="ishimwe-login">Sign In</button>
+                </div>
+                <div class="ishimwe-toggle-panel ishimwe-toggle-right">
+                    <h1 style="color: #fff;">Work to succeed!</h1>
+                    <p>Register with your personal details to use all of site features and keep your continuous growth through process. </p>
+                    <p>You have no account?</p>
+                    <button class="ishimwe-hidden" id="ishimwe-register">Sign Up</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+
+   
+
+
+<footer id="footer" class="footer">
+
+    <div class="container footer-top">
+      <div class="row gy-4">
+        <div class="col-lg-5 col-md-12 footer-about">
+          <a href="../index.html" class="logo d-flex align-items-center">
+            <span>ImBoni</span>
+          </a>
+          <p>Feel free to join us create your free account and start viewing updates and exploring the country's whole education and use it to level up.</p>
+          <div class="social-links d-flex mt-4">
+            <a href=""><i class="bi bi-twitter"></i></a>
+            <a href=""><i class="bi bi-facebook"></i></a>
+            <a href=""><i class="bi bi-instagram"></i></a>
+            <a href=""><i class="bi bi-linkedin"></i></a>
+          </div>
+        </div>
+
+        <div class="col-lg-2 col-6 footer-links">
+          <h4>Useful Links</h4>
+          <ul>
+            <li><a href="../index.html#hero">Home</a></li>
+            <li><a href="../about.html">About us</a></li>
+            <li><a href="../services.html">Services</a></li>
+            <li><a href="../contact.html">Contact</a></li>
+            <li><a href="../team.html">Team</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-2 col-6 footer-links">
+          <h4>Our Services</h4>
+          <ul>
+            <li><a href="../Services/webd.html">Web Design</a></li>
+            <li><a href="../Services/gd.html">Graphic Designs</a></li>
+            <li><a href="../Services/pm.html">Project Management</a></li>
+            <li><a href="../Services/tn.html">Training</a></li>
+            <li><a href="../Services/mk.html">Marketing</a></li>
+            <li><a href="../Services/invcard.html">Invitations</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-3 col-md-12 footer-contact text-center text-md-start">
+          <h4>Contact Us</h4>
+          <p>Kamonyi district</p>
+          <p>Ruyenzi , Rugazi</p>
+          <p>Rwanda</p>
+          <p class="mt-4"><strong>Phone:</strong> <span>+250 781262526</span></p>
+          <p><strong>Email:</strong> <span>ishimweghislain82@gmail.com</span></p>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="container copyright text-center mt-4">
+      <p>&copy; <span>Copyright</span> <strong class="px-1">ImBoni</strong> <span>All Rights Reserved</span></p>
+      <div class="credits">
+    
+        Designed by <a href="#">@Ishimweghislain</a><p>See my portfolio</p>
+      </div>
+    </div>
+
+  </footer>
+  <!-- Scroll Top Button -->
+  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Preloader -->
+  <div id="preloader">
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ishimweContainer = document.getElementById('ishimwe-container');
+        const ishimweRegisterBtn = document.getElementById('ishimwe-register');
+        const ishimweLoginBtn = document.getElementById('ishimwe-login');
+    
+        ishimweRegisterBtn.addEventListener('click', () => {
+            ishimweContainer.classList.add("ishimwe-active");
+        });
+    
+        ishimweLoginBtn.addEventListener('click', () => {
+            ishimweContainer.classList.remove("ishimwe-active");
+        });
+    });
+
+    // check if it is teacher or student the direct u to the right path
+    document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('signupForm');
+    const roleSelect = document.getElementById('roleSelect');
+
+    form.addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent default form submission behavior
+
+        const selectedRole = roleSelect.value;
+        if (selectedRole === 'teacher') {
+            window.location.href = '../forms/teachers_auth.html'; // Redirect to teachers_auth.html
+        } else if (selectedRole === 'student') {
+            window.location.href = '../forms/students_auth.html'; // Redirect to students_auth.html
+        }
+        // You can add more conditions for other roles if needed
+    });
+});
+    </script>
+  <script src="../assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="../assets/vendor/glightbox/js/glightbox.min.js"></script>
+  <script src="../assets/vendor/purecounter/purecounter_vanilla.js"></script>
+  <script src="../assets/vendor/imagesloaded/imagesloaded.pkgd.min.js"></script>
+  <script src="../assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+  <script src="../assets/vendor/swiper/swiper-bundle.min.js"></script>
+  <script src="../assets/vendor/aos/aos.js"></script>
+  <script src="../assets/vendor/php-email-form/validate.js"></script>
+
+  <script src="../assets/js/main.js"></script>
+
+</body>
+
+</html>

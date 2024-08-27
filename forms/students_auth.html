@@ -1,0 +1,861 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>student's auntentication</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="../assets/img/favicon.png" rel="icon">
+    <link href="../assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+    <style>
+       body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            overflow-y: hidden; /* Prevents vertical scrolling */
+        }
+
+        .container {
+            width: 90%;
+            max-width: 600px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            overflow: hidden;
+            position: relative;
+            height: 350px; /* Added height to ensure the container size is fixed */
+            left: 40px;
+        }
+
+        .step {
+    position: absolute;
+    left: 100%;
+    top: 0;
+    width: 100%;
+    transition: transform 1.6s ease-in-out, opacity 1.6s ease-in-out;
+    padding: 20px 0;
+    opacity: 0;
+}
+
+.step.active {
+    left: 0;
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.step.next {
+    transform: translateX(100%);
+}
+
+.step.prev {
+    transform: translateX(0%);
+}
+
+        button {
+            margin-top: 10px;
+            background-color: #333;
+            color: #fff;
+            font-size: 14px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #f44336;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        /* Profile section styles */
+        .profile-section {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .profile-pic {
+            width: 168px;
+            height: 168px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin: 0 auto 20px;
+            border: 1px solid #dddfe2;
+            position: relative;
+        }
+
+        .profile-pic img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-pic .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .profile-pic:hover .overlay {
+            opacity: 1;
+        }
+
+        .profile-pic .overlay-text {
+            color: #ffffff;
+            font-size: 14px;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .file-label {
+            display: inline-block;
+            padding: 8px 16px;
+            font-size: 16px;
+            color: #1877f2;
+            background-color: #e7f3ff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .file-label:hover {
+            background-color: #dbe7f2;
+        }
+
+        .camera-button {
+            display: inline-block;
+            padding: 8px 16px;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+        .container #step1 h2{
+           margin-left: 30px;
+        }
+            
+        .container #step1 input{
+            margin-left: 30px;
+        }
+
+        .container #step1 button{
+            margin-left: 530px;
+            margin-top: 200px;
+        }
+
+        .container #step2 .button{
+            margin-left: 340px;
+            margin-top: 130px;
+            justify-content: space-between;
+        
+        }
+
+        .container #step3 .button{
+            margin-left: 330px;
+            margin-top: 130px;
+            justify-content: space-between;
+        }
+
+        .container #step4 .button{
+            margin-left: 350px;
+            margin-top: 185px;
+            justify-content: space-between;
+        
+        }
+    
+         
+       
+        .wrapper {
+    position: relative;
+    display: flex;
+    width: 100%;
+    height: calc(120vh - 80px);
+    justify-content: center;
+    align-items: center;
+    padding: 0 10%;
+    overflow: hidden;
+}
+
+.wrapper::before {
+    position: absolute;
+    content: '';
+    height: 550px;
+    width: 580px;
+    border-radius: 50%;
+    left: -12%;
+    top: 17.5%;
+    background: black;
+    animation: object1 6s linear infinite;
+    z-index: 1;
+}
+
+.wrapper > div {
+    position: relative;
+    z-index: 2;
+}
+
+.fas.fa-book-open {
+    position: relative;
+    z-index: 3;
+}
+#cameraPreview_olevel,#cameraPreview,#cameraPreview_alevel{
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 30%;
+    height: auto;
+    z-index: 1000;
+    background-color: black;
+    display: none;
+}
+#cameraPreview_olevel,#cameraPreview,#cameraPreview_alevel{
+    display: none;
+}
+
+.bckbut button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 10px 15px;
+  font-size: 16px;
+  cursor: pointer;
+  background-color: #f44336;
+}
+.bckbut button:hover{
+    color: #f44336;
+    background-color: #333;
+}
+.bckbut {
+  position: absolute;
+  top: -20px;  /* Adjust this value to move the button up or down */
+  right: 350px;  /* Adjust this value to move the button left or right */
+}
+
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    
+    <div style="text-align: center; margin-top: 20px;">
+        <i class="fas fa-book-open" style="color: #f44336; font-size: 200px;"></i>
+        <h1 style="font-size: 30px; color: white; margin-top: 10px;">IM<span style="color: #f44336;">B</span>ON<SPAN style="color: #f44336;">I</SPAN></h1>
+        <p style="color: white; margin-top: 10px; font-size: 20px; opacity: 0; animation: fadeIn 3s forwards; ">
+            Welcome <span style="color: #f44336;">Student</span>,<br><span id="typingText" style="border-right: 2px solid black; white-space: nowrap; overflow: hidden; display: inline-block;">
+           </span>
+          </p>
+          <style>
+            @keyframes fadeIn {
+              0% {
+                opacity: 0;
+              }
+              100% {
+                opacity: 1;
+              }
+            }
+          </style>
+    </div>
+    <div class="bckbut">
+        <button onclick="goBack()" style="margin-bottom: 450px; display: flex; align-items: center; gap: 5px; padding: 10px 15px; font-size: 16px; cursor: pointer;">
+          <i class="fas fa-arrow-left"></i> Back
+        </button>
+      </div>
+    
+      <script>
+        function goBack() {
+          window.history.back();
+        }
+      </script>
+        <div class="container">
+            <form id="multiStepForm">
+                <div class="step active" id="step1">
+                    <h2>Choose your perspective section</h2>
+                    <input type="radio" name="yofadmission" value="Primary Level"> Primary Level<br>
+                    <input type="radio" name="yofadmission" value="O'Level"> O'Level<br>
+                    <input type="radio" name="yofadmission" value="A'Level"> A'Level<br>
+                    <button type="button" class="nextBtn">Next</button>
+                </div>
+
+                <!-- Primary questions -->
+                <div class="primary_selection">
+                    <div class="step" id="step2_plevel">
+                        <h2 style="margin: 50px;">Which academic level do you study in ?</h2>
+                        <input type="radio" name="level" value="Primary One"  style="margin-left: 50px;"> Primary One<br>
+                        <input type="radio" name="level" value="Primary Two"  style="margin-left: 50px;"> Primary Two<br>
+                        <input type="radio" name="level" value="Primary Three"  style="margin-left: 50px;"> Primary Three<br>
+                        <input type="radio" name="level" value="Primary Four"  style="margin-left: 50px;"> Primary Four<br>
+                        <input type="radio" name="level" value="Primary Five"  style="margin-left: 50px;"> Primary Five<br>
+                        <input type="radio" name="level" value="Primary Six"  style="margin-left: 50px;"> Primary Six<br>
+                        <div class="button" style="margin-top: 55px; margin-left: 415px;">
+                            <button type="button" class="prevBtn">Previous</button>
+                            <button type="button" class="nextBtn">Next</button>
+                        </div>
+                    </div>
+                    <div class="step" id="step3_plevel">
+                        <h2 style="margin: 50px;">As you are a primary student,<br> please select the type of lessons you are interested in ?</h2>
+                        <input type="checkbox" name="lesson" id="l1"  style="margin-left: 50px;"> Mathematics<br>
+                        <input type="checkbox" name="lesson" id="l2"  style="margin-left: 50px;"> English<br>
+                        <input type="checkbox" name="lesson" id="l3"  style="margin-left: 50px;"> Kinyarwanda<br>
+                        <input type="checkbox" name="lesson" id="l4"  style="margin-left: 50px;"> Science<br>
+                        <input type="checkbox" name="lesson" id="l5"  style="margin-left: 50px;"> Social studies<br>
+                        <div class="button" style="margin-top: 55px; margin-left: 415px;">
+                            <button type="button" class="prevBtn">Previous</button>
+                            <button type="button" class="nextBtn">Next</button>
+                        </div>
+                    </div> 
+                    <div class="step" id="step4_plevel">
+                        <h2 style="margin: 50px;">Now can please tell us the name of your current school ?</h2>
+                        <label for="school" style="display: block; margin-bottom: 8px; font-size: 14px; color: #333; margin-left: 50px;">Input the name of your school,</label>
+                        <input type="text" style="width: 80%; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; margin-left: 50px; margin-top: 10px;">
+                        <div class="button" style="margin-top: 105px; margin-left: 415px;">
+                            <button type="button" class="prevBtn">Previous</button>
+                            <button type="button" class="nextBtn">Next</button>
+                        </div>
+                    </div>
+                    <div class="step" id="step5_plevel">
+                        <div class="profilesection">
+                            <h2 style="margin-left: 30px;">Choose Profile Picture</h2>
+                            <div class="profile-section">
+                                <div class="profile-pic">
+                                    <img id="profileImage" src="https://static.xx.fbcdn.net/rsrc.php/v3/yo/r/UlIqmHJn-SK.gif" alt="Profile Picture">
+                                    <div class="overlay">
+                                        <span class="overlay-text">Change Picture</span>
+                                    </div>
+                                </div>
+                                <input type="file" id="fileInput" accept="image/*">
+                                <label for="fileInput" class="file-label">Choose Photo</label>
+                                <button type="button" id="cameraButton" class="camera-button">Take Photo</button>
+                                <video id="cameraPreview" style="display:none;"></video>
+                                <canvas id="photoCanvas" style="display:none;"></canvas>
+                            </div>
+                        </div>
+                        <div class="buttoni" style="margin-left: 415px; margin-top: 12px;">
+                            <button type="button" class="prevBtn">Previous</button>
+                            <button type="button" class="nextBtn" onclick="window.location.href='../stdents_dashboard/stdash.html'">Next</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- O'Level section -->
+                <div class="olevel_section">
+                    <div class="step" id="step2_olevel">
+                        <h2 style="margin: 50px;">Which academic level do you study in ?</h2>
+                        <input type="radio" name="level" value="Sec One" style="margin-left: 50px;">Secondary One<br>
+                        <input type="radio" name="level" value="Sec two"  style="margin-left: 50px;">Secondary Two<br>
+                        <input type="radio" name="level" value="Sec three"  style="margin-left: 50px;">Secondary Three<br>
+                        <div class="button" style="margin-top: 115px; margin-left: 415px;">
+                            <button type="button" class="prevBtn">Previous</button>
+                            <button type="button" class="nextBtn">Next</button>
+                        </div>
+                        
+                    </div>
+                    <div class="step" id="step3_olevel">
+                        <h2 style="margin: 40px;">As you are a secondary student,<br> please select the type of lessons you are interested in ?</h2>
+                        <input type="checkbox" name="lesson" id="l1"  style="margin-left: 50px;"> Mathematics<br>
+                        <input type="checkbox" name="lesson" id="l2"  style="margin-left: 50px;"> English<br>
+                        <input type="checkbox" name="lesson" id="l3"  style="margin-left: 50px;"> Kinyarwanda<br>
+                        <input type="checkbox" name="lesson" id="l4"  style="margin-left: 50px;"> Physics<br>
+                        <input type="checkbox" name="lesson" id="l5"  style="margin-left: 50px;"> Geography<br>
+                        <input type="checkbox" name="lesson" id="l6"  style="margin-left: 50px;"> History<br>
+                        <input type="checkbox" name="lesson" id="l7"  style="margin-left: 50px;"> Chemistry<br>
+                        <input type="checkbox" name="lesson" id="l8"  style="margin-left: 50px;"> Entrepreneurship<br>
+                        <input type="checkbox" name="lesson" id="l9"  style="margin-left: 50px;"> Biology<br>
+                        <div class="button" style="margin-left: 415px;">
+                            <button type="button" class="prevBtn">Previous</button>
+                            <button type="button" class="nextBtn">Next</button>
+                        </div>
+                    </div>
+                    <div class="step" id="step4_olevel">
+                        <h2 style="margin: 50px;">Now can please tell us the name of your current school ?</h2>
+                        <label for="school" style="display: block; margin-bottom: 8px; font-size: 14px; color: #333; margin-left: 50px;">Input the name of your school,</label>
+                        <input type="text" style="width: 80%; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; margin-left: 50px; margin-top: 10px;">
+                        <div class="button" style="margin-top: 105px; margin-left: 415px;">
+                            <button type="button" class="prevBtn">Previous</button>
+                            <button type="button" class="nextBtn">Next</button>
+                        </div>
+                    </div>
+                    <div class="step" id="step5_olevel">
+                        <div class="profilesection">
+                            <h2 style="margin-left: 30px;">Choose Profile Picture</h2>
+                            <div class="profile-section">
+                                <div class="profile-pic">
+                                    <img id="profileImage_olevel" src="https://static.xx.fbcdn.net/rsrc.php/v3/yo/r/UlIqmHJn-SK.gif" alt="Profile Picture">
+                                    <div class="overlay">
+                                        <span class="overlay-text">Change Picture</span>
+                                    </div>
+                                </div>
+                                <input type="file" id="fileInput_olevel" accept="image/*" style="display: none;">
+                                <label for="fileInput_olevel" class="file-label">Choose Photo</label>
+                                <button type="button" id="cameraButton_olevel" class="camera-button">Take Photo</button>
+                                <video id="cameraPreview_olevel" style="display:none;"></video>
+                                <canvas id="photoCanvas_olevel" style="display:none;"></canvas>
+                            </div>
+                            <div class="buttoni" style="margin-left: 415px; margin-top: 12px;">
+                                <button type="button" class="prevBtn">Previous</button>
+                                <button type="button" class="nextBtn" onclick="window.location.href='../stdents_dashboard/stdash.html'">Next</button>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+
+                <!-- A'Level section -->
+                <div class="alevel_section">
+                    <div class="step" id="step2_alevel">
+                        <h2 style="margin: 50px;">What type of A'Level do you participate in ?</h2>
+                        <input type="radio" name="alevel_type" value="REB" style="margin-left: 50px;">REB<br>
+                        <input type="radio" name="alevel_type" value="TVET" style="margin-left: 50px; ">TVET<br>
+                        <div class="buttoni" style="position: absolute; left: 415px; margin-top: 140px;">
+                            <button type="button" class="prevBtn">Previous</button>
+                            <button type="button" class="nextBtn">Next</button>
+                        </div>
+                    </div>
+                    <div class="step" id="alevel_for_REB">
+                        <h2 style="margin: 50px;">Choose the REB combination you study</h2>
+                        <input type="radio" name="reb_combination" id="mcb" style="margin-left: 50px;"> MCB<br>
+                        <input type="radio" name="reb_combination" id="pcb" style="margin-left: 50px;"> PCB<br>
+                        <input type="radio" name="reb_combination" id="mpc" style="margin-left: 50px;"> MPC<br>
+                        <div class="buttoni" style="position: absolute; left: 415px; margin-top: 120px;">
+                            <button type="button" class="prevBtn">Previous</button>
+                            <button type="button" class="nextBtn">Next</button>
+                        </div>
+                    </div>
+                    <div class="step" id="alevel_for_Tvet">
+                        <h2 style="margin: 50px;">Choose the TVET you study</h2>
+                        <input type="radio" name="tvet_option" id="sod" style="margin-left: 50px;"> SOD<br>
+                        <input type="radio" name="tvet_option" id="csa" style="margin-left: 50px;"> CSA<br>
+                        <input type="radio" name="tvet_option" id="net" style="margin-left: 50px;"> NETWORKING<br>
+                        <div class="buttoni" style="position: absolute; left: 415px; margin-top: 120px;">
+                            <button type="button" class="prevBtn">Previous</button>
+                            <button type="button" class="nextBtn">Next</button>
+                        </div>
+                    </div>
+                    <div class="step" id="step3_alevel">
+                        <h2 style="margin: 50px;">Now can please tell us the name of your current school ?</h2>
+                        <label for="school" style="display: block; margin-bottom: 8px; font-size: 14px; color: #333; margin-left: 50px;">Input the name of your school,</label>
+                        <input type="text" style="width: 80%; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; margin-left: 50px; margin-top: 10px;">
+                        <div class="button" style="margin-top: 105px; margin-left: 415px;">
+                            <button type="button" class="prevBtn">Previous</button>
+                            <button type="button" class="nextBtn">Next</button>
+                        </div>
+                    </div>
+                    <div class="step" id="step4_alevel">
+                        <div class="profilesection">
+                            <h2 style="margin-left: 30px;">Choose Profile Picture</h2>
+                            <div class="profile-section">
+                                <div class="profile-pic">
+                                    <img id="profileImage_alevel" src="https://static.xx.fbcdn.net/rsrc.php/v3/yo/r/UlIqmHJn-SK.gif" alt="Profile Picture">
+                                    <div class="overlay">
+                                        <span class="overlay-text">Change Picture</span>
+                                    </div>
+                                </div>
+                                <input type="file" id="fileInput_alevel" accept="image/*" style="display: none;">
+                                <label for="fileInput_alevel" class="file-label">Choose Photo</label>
+                                <button type="button" id="cameraButton_alevel" class="camera-button">Take Photo</button>
+                                <video id="cameraPreview_alevel" style="display:none;"></video>
+                                <canvas id="photoCanvas_alevel" style="display:none;"></canvas>
+                            </div>
+                        </div>
+                        <div class="buttoni" style="margin-left: 415px; margin-top: 12px;">
+                            <button type="button" class="prevBtn">Previous</button>
+                            <button type="button" class="nextBtn" onclick="window.location.href='../stdents_dashboard/stdash.html'">Next</button>
+                        </div>
+                    </div>
+            </form>
+        </div>
+    </div>
+    <script>
+     document.addEventListener('DOMContentLoaded', function () {
+    let currentStep = 1;
+    const form = document.getElementById('multiStepForm');
+    const nextBtns = document.querySelectorAll('.nextBtn');
+    const prevBtns = document.querySelectorAll('.prevBtn');
+    const steps = document.querySelectorAll('.step');
+    let selectedPerspective = '';
+
+    function showStep(stepId, direction) {
+        const currentStepElement = steps[currentStep - 1];
+        const newStep = document.getElementById(stepId);
+        
+        if (newStep) {
+            // Remove active class from current step
+            currentStepElement.classList.remove('active');
+            
+            // Add appropriate class for animation
+            if (direction === 'next') {
+                currentStepElement.classList.add('prev');
+                newStep.classList.add('next');
+            } else {
+                currentStepElement.classList.add('next');
+                newStep.classList.add('prev');
+            }
+            
+            // Force reflow
+            newStep.offsetWidth;
+            
+            // Add active class to new step and remove prev/next
+            newStep.classList.add('active');
+            newStep.classList.remove('prev', 'next');
+            
+            // Update current step
+            currentStep = Array.from(steps).indexOf(newStep) + 1;
+            
+            // Clean up classes after animation
+            setTimeout(() => {
+                steps.forEach(step => {
+                    if (step !== newStep) {
+                        step.classList.remove('active', 'prev', 'next');
+                    }
+                });
+            }, 500); // This should match the transition duration in CSS
+        }
+    }
+
+    nextBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const currentStepElement = steps[currentStep - 1];
+
+            if (currentStepElement.id === 'step1') {
+                const selectedRadio = currentStepElement.querySelector('input[name="yofadmission"]:checked');
+                if (selectedRadio) {
+                    selectedPerspective = selectedRadio.value;
+                    switch (selectedPerspective) {
+                        case 'Primary Level':
+                            showStep('step2_plevel', 'next');
+                            break;
+                        case 'O\'Level':
+                            showStep('step2_olevel', 'next');
+                            break;
+                        case 'A\'Level':
+                            showStep('step2_alevel', 'next');
+                            break;
+                    }
+                } else {
+                    alert('Please select a perspective section.');
+                    return;
+                }
+            } else {
+                let nextStepId;
+                switch (currentStepElement.id) {
+                    // Primary Level routing
+                    case 'step2_plevel':
+                        nextStepId = 'step3_plevel';
+                        break;
+                    case 'step3_plevel':
+                        nextStepId = 'step4_plevel';
+                        break;
+                    case 'step4_plevel':
+                        nextStepId = 'step5_plevel';
+                        break;
+
+                    // O'Level routing
+                    case 'step2_olevel':
+                        nextStepId = 'step3_olevel';
+                        break;
+                    case 'step3_olevel':
+                        nextStepId = 'step4_olevel';
+                        break;
+                    case 'step4_olevel':
+                        nextStepId = 'step5_olevel';
+                        break;
+
+                    // A'Level routing
+                    case 'step2_alevel':
+                        const aLevelType = currentStepElement.querySelector('input[name="alevel_type"]:checked');
+                        if (aLevelType) {
+                            nextStepId = aLevelType.value === 'REB' ? 'alevel_for_REB' : 'alevel_for_Tvet';
+                        } else {
+                            alert('Please select an A\'Level type.');
+                            return;
+                        }
+                        break;
+                    case 'alevel_for_REB':
+                    case 'alevel_for_Tvet':
+                        nextStepId = 'step3_alevel';
+                        break;
+                    case 'step3_alevel':
+                        nextStepId = 'step4_alevel';
+                        break;
+                }
+
+                if (nextStepId) {
+                    showStep(nextStepId, 'next');
+                }
+            }
+        });
+    });
+
+    prevBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const currentStepElement = steps[currentStep - 1];
+            let prevStepId;
+
+            switch (currentStepElement.id) {
+                // Primary Level routing
+                case 'step3_plevel':
+                case 'step3_olevel':
+                case 'alevel_for_REB':
+                case 'alevel_for_Tvet':
+                    prevStepId = 'step1';
+                    break;
+                case 'step4_plevel':
+                    prevStepId = 'step3_plevel';
+                    break;
+                case 'step5_plevel':
+                    prevStepId = 'step4_plevel';
+                    break;
+
+                // O'Level routing
+                case 'step4_olevel':
+                    prevStepId = 'step3_olevel';
+                    break;
+                case 'step5_olevel':
+                    prevStepId = 'step4_olevel';
+                    break;
+
+                // A'Level routing
+                case 'step3_alevel':
+                    prevStepId = selectedPerspective === 'A\'Level' ? 'step2_alevel' : 'step1';
+                    break;
+                case 'step4_alevel':
+                    prevStepId = 'step3_alevel';
+                    break;
+
+                default:
+                    prevStepId = 'step1';
+            }
+
+            if (prevStepId) {
+                showStep(prevStepId, 'prev');
+            }
+        });
+    });
+
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        alert('Form submitted!');
+        // Add your form submission logic here
+    });
+
+    // Profile picture upload functionality
+    const fileInput = document.getElementById('fileInput');
+    const profileImage = document.getElementById('profileImage');
+
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                profileImage.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+    
+
+    // Camera functionality
+    const cameraButton = document.getElementById('cameraButton');
+    const cameraPreview = document.getElementById('cameraPreview');
+    const photoCanvas = document.getElementById('photoCanvas');
+    let stream;
+
+    cameraButton.addEventListener('click', async function() {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            cameraPreview.srcObject = stream;
+            cameraPreview.style.display = 'block';
+            cameraPreview.play();
+            cameraButton.textContent = 'Capture Photo';
+            cameraButton.removeEventListener('click', arguments.callee);
+            cameraButton.addEventListener('click', capturePhoto);
+        } catch (err) {
+            console.error("Error accessing camera: ", err);
+            alert("Unable to access the camera. Please make sure you've granted camera permissions.");
+        }
+    });
+
+    function capturePhoto() {
+        photoCanvas.width = cameraPreview.videoWidth;
+        photoCanvas.height = cameraPreview.videoHeight;
+        photoCanvas.getContext('2d').drawImage(cameraPreview, 0, 0);
+        profileImage.src = photoCanvas.toDataURL('image/jpeg');
+        
+        // Stop the camera stream
+        stream.getTracks().forEach(track => track.stop());
+        cameraPreview.style.display = 'none';
+        cameraButton.textContent = 'Take Photo';
+        cameraButton.removeEventListener('click', capturePhoto);
+        cameraButton.addEventListener('click', arguments.callee);
+    }
+
+    // Initialize first step
+    steps[0].classList.add('active');
+    Array.from(steps).slice(1).forEach(step => step.classList.add('next'));
+});
+document.addEventListener('DOMContentLoaded', function () {
+    const profileImage = document.getElementById('profileImage_olevel');
+    const fileInput = document.getElementById('fileInput_olevel');
+    const cameraButton = document.getElementById('cameraButton_olevel');
+    const cameraPreview = document.getElementById('cameraPreview_olevel');
+    const photoCanvas = document.getElementById('photoCanvas_olevel');
+    let stream;
+
+    // File input handling
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                profileImage.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Camera functionality
+    cameraButton.addEventListener('click', async function() {
+        if (cameraPreview.style.display === 'none') {
+            // Open camera
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                cameraPreview.srcObject = stream;
+                cameraPreview.style.display = 'block';
+                cameraButton.textContent = 'Capture Photo';
+                cameraPreview.play(); // Start playing the video
+            } catch (err) {
+                console.error("Error accessing camera: ", err);
+                alert("Unable to access the camera. Please make sure you've granted camera permissions.");
+            }
+        } else {
+            // Capture photo
+            photoCanvas.width = cameraPreview.videoWidth;
+            photoCanvas.height = cameraPreview.videoHeight;
+            photoCanvas.getContext('2d').drawImage(cameraPreview, 0, 0);
+            profileImage.src = photoCanvas.toDataURL('image/jpeg');
+            
+            // Stop the camera stream and hide preview
+            stream.getTracks().forEach(track => track.stop());
+            cameraPreview.style.display = 'none';
+            cameraButton.textContent = 'Take Photo';
+        }
+    });
+
+    // Debugging
+    console.log('Profile Image:', profileImage);
+    console.log('File Input:', fileInput);
+    console.log('Camera Button:', cameraButton);
+    console.log('Camera Preview:', cameraPreview);
+    console.log('Photo Canvas:', photoCanvas);
+});
+document.addEventListener('DOMContentLoaded', function () {
+    const profileImage = document.getElementById('profileImage_alevel');
+    const fileInput = document.getElementById('fileInput_alevel');
+    const cameraButton = document.getElementById('cameraButton_alevel');
+    const cameraPreview = document.getElementById('cameraPreview_alevel');
+    const photoCanvas = document.getElementById('photoCanvas_alevel');
+    let stream;
+
+    // File input handling
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                profileImage.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Camera functionality
+    cameraButton.addEventListener('click', async function() {
+        if (cameraPreview.style.display === 'none') {
+            // Open camera
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                cameraPreview.srcObject = stream;
+                cameraPreview.style.display = 'block';
+                cameraButton.textContent = 'Capture Photo';
+                cameraPreview.play(); // Start playing the video
+            } catch (err) {
+                console.error("Error accessing camera: ", err);
+                alert("Unable to access the camera. Please make sure you've granted camera permissions.");
+            }
+        } else {
+            // Capture photo
+            photoCanvas.width = cameraPreview.videoWidth;
+            photoCanvas.height = cameraPreview.videoHeight;
+            photoCanvas.getContext('2d').drawImage(cameraPreview, 0, 0);
+            profileImage.src = photoCanvas.toDataURL('image/jpeg');
+            
+            // Stop the camera stream and hide preview
+            stream.getTracks().forEach(track => track.stop());
+            cameraPreview.style.display = 'none';
+            cameraButton.textContent = 'Take Photo';
+        }
+    });
+
+    // Debugging
+    console.log('Profile Image:', profileImage);
+    console.log('File Input:', fileInput);
+    console.log('Camera Button:', cameraButton);
+    console.log('Camera Preview:', cameraPreview);
+    console.log('Photo Canvas:', photoCanvas);
+});
+
+
+// typing animation
+document.addEventListener('DOMContentLoaded', function() {
+    const textToType = "please fill the forms \nto help you get\n relevant information.";
+    const typingTextElement = document.getElementById('typingText');
+    let index = 0;
+
+    function typeText() {
+        if (index < textToType.length) {
+            let currentChar = textToType.charAt(index);
+            if (currentChar === '\n') {
+                typingTextElement.innerHTML += "<br>";
+            } else {
+                typingTextElement.innerHTML += currentChar;
+            }
+            index++;
+            setTimeout(typeText, 100); // Adjust typing speed by changing the delay (in milliseconds)
+        } else {
+            // Remove the blinking cursor after typing is complete
+            typingTextElement.style.borderRight = 'none';
+        }
+    }
+
+    typeText();
+});
+    </script>
+</body>
+</html>
+
+
+
+
+
+

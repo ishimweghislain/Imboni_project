@@ -1,0 +1,47 @@
+body {
+    /* Hide both horizontal and vertical scrollbars */
+    overflow-x: hidden; /* Hide horizontal scrollbar */
+
+}
+.mybuttons .btn-getstarted {
+    padding: 5px 60px; /* Add padding for better click/tap area */
+    text-decoration: none; /* Remove underline */
+    background-color: #f44336; /* Button background color */
+    color: #fff; /* Text color */
+    border: none; /* Remove border */
+    border-radius: 4px; /* Add border radius for rounded corners */
+    transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+    margin-right: 10px; /* Add margin between buttons */
+    margin-top: 50px;
+}
+
+/* Remove margin-right from the last button */
+
+/* Hover effect */
+.mybuttons .btn-getstarted:hover {
+    background-color: #d12518; 
+}
+
+/* Set the column to flex layout */
+
+
+/* Set the container to flex layout */
+.mybuttons {
+    display: flex;
+}
+.mylogo{
+    display: flex;
+    flex: 1;
+    padding: 2% 20%;
+    gap: 20px;
+    align-items: center;
+}
+.scrolled {
+    color: black; /* Change color to black when scrolled */
+}
+.fit-image {
+    width: 100%;
+    height: 300px; /* Adjust the height as needed */
+    object-fit: cover;
+  }
+  
