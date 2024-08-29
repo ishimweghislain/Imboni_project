@@ -1,3 +1,101 @@
+
+<?php
+ob_start(); 
+$redirect_url = '';
+
+if (isset($_POST["submit"])) {
+    $fname = $_POST["fname"];
+    $lname = $_POST["lname"];
+    $email = $_POST["email"];
+    $password = $_POST["password"];
+    $role = $_POST["role"];
+
+    $errors = array();
+
+    // Validation checks
+    if (empty($fname) || empty($lname) || empty($email) || empty($password)) {
+        array_push($errors, "Please fill in all fields!");
+    }
+
+    require_once "db.php";
+
+    $stmt = "SELECT *from users WHERE email = '$email'";
+    $result =mysqli_query($conn,$stmt);
+    $rowcount = mysqli_num_rows($result);
+
+    if($rowcount>0){
+        array_push($errors, "Email has been used,use another email !");
+    }
+
+    if (!empty($fname) && preg_match('/[0-9]/', $fname)) {
+        array_push($errors, "First name must not contain numbers!");
+    }
+
+    if (!empty($lname) && preg_match('/[0-9]/', $lname)) {
+        array_push($errors, "Last name must not contain numbers!");
+    }
+
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        array_push($errors, "Email is not valid!");
+    }
+
+    if (strlen($password) < 8) {
+        array_push($errors, "Password must be at least 8 characters long!");
+    }
+
+    if (empty($role) || ($role != 'teacher' && $role != 'student')) {
+        array_push($errors, "Please select a valid role!");
+    }
+
+    // Display errors if there are any
+    if (count($errors) > 0) {
+        foreach ($errors as $error) {
+            echo "<div class='alert alert-danger custom-alert'>$error</div>";
+        }
+    } else {
+        // No validation errors, proceed to insert data into the database
+
+        // Database connection
+        $servername = "localhost";
+        $username = "root";  // replace with your database username
+        $password_db = "";  // replace with your database password
+        $dbname = "imboni";
+
+        // Create connection
+        $conn = new mysqli($servername, $username, $password_db, $dbname);
+
+        // Check connection
+        if ($conn->connect_error) {
+            die("Connection failed: " . $conn->connect_error);
+        }
+
+        // Prepare and bind
+        $stmt = $conn->prepare("INSERT INTO users (fname, lname, email, password, role) VALUES (?, ?, ?, ?, ?)");
+        $stmt->bind_param("sssss", $fname, $lname, $email, $hashed_password, $role);
+
+        // Hash the password before saving it
+        $hashed_password = password_hash($password, PASSWORD_BCRYPT);
+
+        // Execute the statement
+        if ($stmt->execute()) {
+            echo "<div class='alert alert-success custom-alert'>New account created successfully</div>";
+            
+            // Redirect based on role
+            if ($role == 'student') {
+                header("Location: students_auth.html");
+            } else {
+                header("Location: teachers_auth.html");
+            } 
+            exit(); 
+        } else {
+            echo "<div class='alert alert-danger'>Error: " . $stmt->error . "</div>";
+        }
+
+        $stmt->close();
+        $conn->close();
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -30,239 +128,8 @@
   
   <link href="../assets/css/main.css" rel="stylesheet">
   <link href="../assets/css/style.css" rel="stylesheet">
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
-*{
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Montserrat', sans-serif;
-}
-body{
-    background-color: #f4f4f4;
-    background: linear-gradient(to , #e2e2e2, #f44336);
-    align-items: center;
-    justify-content: center;
-    height: 130vh;
-}
-.ishimwe-container{
-    background-color: #ffff;
-    border-radius: 30px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
-    position: relative;
-    overflow: hidden;
-    width: 160vh;
-    left: 180px;
-    height: 80vh;
-    max-width: 100%;
-    margin-top: 80px;
-}
-.ishimwe-container p{
-    font-size: 14px;
-    line-height: 20px;
-    letter-spacing: 0.3px;
-    margin: 20px 0;
-}
-.ishimwe-container span{
-    font-size: 12px;
-}
-.ishimwe-container a{
-    color: #333;
-    font-size: 13px;
-    text-decoration: none;
-    margin: 15px 0 10px;
-}
-.ishimwe-container button{
-    background-color: #333;
-    color: #fff;
-    font-size: 12px;
-    padding: 10px 45px;
-    border: 1px solid transparent;
-    border-radius: 8px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    margin-top: 10px;
-    cursor: pointer;
-}
-.ishimwe-container button:hover{
-    background-color: #f44336;
-}
-.ishimwe-container button.ishimwe-hidden{
-    background-color: transparent;
-    border-color: #fff;
-}
-.ishimwe-container form{
-    background-color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    padding: 0 40px;
-    height: 100%;
-}
-.ishimwe-container input{
-    background-color: #eee;
-    border: none;
-    margin: 8px 0;
-    padding: 10px 15px;
-    font-size: 13px;
-    border-radius: 8px;
-    width: 100%;
-    outline: none;
-}
-.ishimwe-form-container{
-    position: absolute;
-    top: 0;
-    height: 100%;
-    transition: all 0.6s ease-in-out;
-}
-.ishimwe-sign-up{
-    left: 0;
-    width: 50%;
-    z-index: 2;
-}
-.ishimwe-container.ishimwe-active .ishimwe-sign-up{
-    transform: translateX(100%);
-}
-.ishimwe-sign-in{
-    left: 0;
-    width: 50%;
-    opacity: 0;
-    z-index: 0;
-}
-.ishimwe-container.ishimwe-active .ishimwe-sign-in{
-    transform: translateX(100%);
-    opacity: 1;
-    z-index: 5;
-    animation: ishimwe-move 0.6s;
-}
-@keyframes ishimwe-move{
-    0%, 49.99%{
-        opacity: 0;
-        z-index: 5;
-    }
-    50%, 100%{
-        opacity: 1;
-        z-index: 5;
-    }
-}
-.ishimwe-social-icons{
-    margin: 20px 0;
-}
-.ishimwe-social-icons a{
-    border: 1px solid #ccc;
-    border-radius: 20%;
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    margin: 0 3px;
-    width: 40px;
-    height: 40px;
-}
-.ishimwe-social-icons a:hover{
-    color: #e03c30;
-    background-color: #333;
-}
-.ishimwe-toggle-container{
-    position: absolute;
-    top: 0;
-    left: 50%;
-    width: 50%;
-    height: 100%;
-    overflow: hidden;
-    transition: all 0.6s ease-in-out;
-    border-radius: 150px 0 0 100px;
-    z-index: 1000;
-}
-.ishimwe-container.ishimwe-active .ishimwe-toggle-container{
-    transform: translateX(-100%);
-    border-radius: 0 150px 100px 0;
-}
-.ishimwe-toggle{
-    background-color: #f44336;
-    height: 100%;
-    background: linear-gradient(to right, #f44336, #e03c30 );
-    color: #fff;
-    position: relative;
-    left: -100%;
-    height: 100%;
-    width: 200%;
-    transform: translateX(0);
-    transition: all 0.6ss ease-in-out;
-}
-.ishimwe-container.ishimwe-active .ishimwe-toggle{
-    transform: translateX(50%);
-}
-#header, #navmenu {
-    z-index: 1001; /* or a higher value */
-}
-.ishimwe-toggle-panel{
-    position: absolute;
-    width: 50%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    padding: 0 30px;
-    text-align: center;
-    top: 0;
-    transform: translateX(0);
-    transition: all 0.6s ease-in-out;
-}
-/* Add this CSS to change the background color of buttons on hover */
-.ishimwe-toggle-panel button.ishimwe-hidden {
-    background-color: #333;
-    transition: background-color 0.3s;
-}
-.ishimwe-toggle-panel button.ishimwe-hidden:hover {
-    background-color: #f44336;
-}
-.ishimwe-toggle-left{
-    transform: translateX(-200%);
-}
-.ishimwe-container.ishimwe-active .ishimwe-toggle-left{
-    transform: translateX(0);
-}
-.ishimwe-toggle-right{
-    right: 0;
-    transform: translateX(0);
-}
-.ishimwe-container.ishimwe-active .ishimwe-toggle-right{
-    transform: translateX(200);
-}
-/* Example of media query for small screens */
-@media only screen and (max-width: 720px) {
-    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
-*{
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Montserrat', sans-serif;
-}
-body{
-    background-color: #f4f4f4;
-    background: linear-gradient(to , #e2e2e2, #f44336);
-    align-items: center;
-    justify-content: center;
-    height: 130vh;
-}
-.ishimwe-container{
-    background-color: #ffff;
-    border-radius: 30px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
-    position: relative;
-    overflow: hidden;
-    width: 50vh;
-    left: 50px;
-    height: 80vh;
-    max-width: 100%;
-    margin-top: 80px;
-}
-}
-
-  </style>
+  <link href="../assets/css/createacc.css" rel="stylesheet">
+  
   
  
 </head>
@@ -311,9 +178,10 @@ body{
         </div>
       </header>
   <main id="ishimwe-main">
+  
     <div class="ishimwe-container" id="ishimwe-container">
         <div class="ishimwe-form-container ishimwe-sign-up">
-            <form id="signupForm" action="register.php" method="POST">
+            <form id="signupForm" action="createacc.php" method="post">
                 <h1>Create Account</h1>
                 <div class="ishimwe-social-icons">
                     <a href="#" class="icon"><i class="fab fa-google-plus-g"></i></a>
@@ -324,26 +192,26 @@ body{
                 <span>or use your email for registration</span>
                 <div class="row">
                     <div class="col-md-6">
-                        <input type="text" class="form-control" placeholder="First Name" required>
+                        <input type="text" class="form-control" placeholder="First Name" name="fname" >
                     </div>
                     <div class="col-md-6">
-                        <input type="text" class="form-control" placeholder="Last Name" required>
+                        <input type="text" class="form-control" placeholder="Last Name" name="lname" >
                     </div>
                 </div>
-                <input type="email" class="form-control" placeholder="Email" required>
-                <input type="password" class="form-control" placeholder="Password" required>
-                <select id="roleSelect" class="form-control" required style="background-color: #eee; cursor: pointer;">
-                    <option value="" disabled selected>Select your role</option>
-                    <option value="teacher">Teacher</option>
-                    <option value="student">Student</option>
-                </select>
-                <button type="submit" style="width: 100%;">Sign Up</button>
+                <input type="email" class="form-control" placeholder="Email" name="email">
+                <input type="password" class="form-control" placeholder="Password" name="password" >
+              <select id="roleSelect" class="form-control" name="role" required style="background-color: #eee; cursor: pointer;">
+    <option value="" disabled selected>Select your role</option>
+    <option value="teacher">Teacher</option>
+    <option value="student">Student</option>
+</select>
+                <button type="submit" style="width: 100%;" name="submit">Sign Up</button>
             </form>
             
         </div>
         <div class="ishimwe-form-container ishimwe-sign-in">
             <form id="ishimwe-signUpForm">
-                <h1>Create Account</h1>
+                <h1>Create count</h1>
                 <div class="ishimwe-social-icons">
                     <a href="#" class="icon"><i class="fa-brands fa-google-plus-g"></i></a>
                     <a href="#" class="icon"><i class="fa-brands fa-facebook-f"></i></a>
@@ -485,15 +353,24 @@ body{
     const roleSelect = document.getElementById('roleSelect');
 
     form.addEventListener('submit', function(event) {
-        event.preventDefault(); // Prevent default form submission behavior
+        // Remove this line to allow form submission
+        // event.preventDefault();
 
         const selectedRole = roleSelect.value;
         if (selectedRole === 'teacher') {
-            window.location.href = 'teachers_auth.html'; // Redirect to teachers_auth.html
+            // Set a hidden input field instead of redirecting
+            let hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'role';
+            hiddenInput.value = 'teacher';
+            form.appendChild(hiddenInput);
         } else if (selectedRole === 'student') {
-            window.location.href = 'students_auth.html'; // Redirect to students_auth.html
+            let hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'role';
+            hiddenInput.value = 'student';
+            form.appendChild(hiddenInput);
         }
-        // You can add more conditions for other roles if needed
     });
 });
     </script>
