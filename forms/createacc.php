@@ -1,101 +1,110 @@
-
 <?php
 ob_start(); 
 $redirect_url = '';
 
 if (isset($_POST["submit"])) {
-    $fname = $_POST["fname"];
-    $lname = $_POST["lname"];
-    $email = $_POST["email"];
-    $password = $_POST["password"];
-    $role = $_POST["role"];
+    $email = isset($_POST["email"]) ? $_POST["email"] : '';
+    $password = isset($_POST["password"]) ? $_POST["password"] : '';
+    $role = isset($_POST["role"]) ? $_POST["role"] : '';
 
     $errors = array();
 
-    // Validation checks
-    if (empty($fname) || empty($lname) || empty($email) || empty($password)) {
-        array_push($errors, "Please fill in all fields!");
-    }
+    // Check if it's a sign-in attempt
+    if (!isset($_POST["fname"])) {
+        // Sign-in process
+        if (empty($email) || empty($password)) {
+            array_push($errors, "Please fill in all fields!");
+        }
 
-    require_once "db.php";
+        if (empty($errors)) {
+            require_once "db.php";
 
-    $stmt = "SELECT *from users WHERE email = '$email'";
-    $result =mysqli_query($conn,$stmt);
-    $rowcount = mysqli_num_rows($result);
+            $sql = "SELECT * FROM users WHERE email = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("s", $email);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $user = $result->fetch_assoc();
 
-    if($rowcount>0){
-        array_push($errors, "Email has been used,use another email !");
-    }
-
-    if (!empty($fname) && preg_match('/[0-9]/', $fname)) {
-        array_push($errors, "First name must not contain numbers!");
-    }
-
-    if (!empty($lname) && preg_match('/[0-9]/', $lname)) {
-        array_push($errors, "Last name must not contain numbers!");
-    }
-
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        array_push($errors, "Email is not valid!");
-    }
-
-    if (strlen($password) < 8) {
-        array_push($errors, "Password must be at least 8 characters long!");
-    }
-
-    if (empty($role) || ($role != 'teacher' && $role != 'student')) {
-        array_push($errors, "Please select a valid role!");
-    }
-
-    // Display errors if there are any
-    if (count($errors) > 0) {
-        foreach ($errors as $error) {
-            echo "<div class='alert alert-danger custom-alert'>$error</div>";
+            if ($user && password_verify($password, $user['password'])) {
+                // Valid credentials
+                if ($user['role'] == 'teacher') {
+                    header("Location: ../tchers_dashboard/tdash.html");
+                } elseif ($user['role'] == 'student') {
+                    header("Location: ../stdents_dashboard/stdash.html");
+                }
+                exit();
+            } else {
+                array_push($errors, "Invalid email or password. Please put correct credentials !");
+            }
         }
     } else {
-        // No validation errors, proceed to insert data into the database
+        // Registration process
+        $fname = isset($_POST["fname"]) ? $_POST["fname"] : '';
+        $lname = isset($_POST["lname"]) ? $_POST["lname"] : '';
 
-        // Database connection
-        $servername = "localhost";
-        $username = "root";  // replace with your database username
-        $password_db = "";  // replace with your database password
-        $dbname = "imboni";
-
-        // Create connection
-        $conn = new mysqli($servername, $username, $password_db, $dbname);
-
-        // Check connection
-        if ($conn->connect_error) {
-            die("Connection failed: " . $conn->connect_error);
+        // Validation checks
+        if (empty($fname) || empty($lname) || empty($email) || empty($password) || empty($role)) {
+            array_push($errors, "Please all fields are required !");
         }
 
-        // Prepare and bind
-        $stmt = $conn->prepare("INSERT INTO users (fname, lname, email, password, role) VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param("sssss", $fname, $lname, $email, $hashed_password, $role);
+        require_once "db.php";
 
-        // Hash the password before saving it
-        $hashed_password = password_hash($password, PASSWORD_BCRYPT);
+        $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $rowcount = $result->num_rows;
 
-        // Execute the statement
-        if ($stmt->execute()) {
-            echo "<div class='alert alert-success custom-alert'>New account created successfully</div>";
-            
-            // Redirect based on role
-            if ($role == 'student') {
-                header("Location: students_auth.html");
+        if ($rowcount > 0) {
+            array_push($errors, "Email has been used, use another email!");
+        }
+
+        if (!empty($fname) && preg_match('/[0-9]/', $fname)) {
+            array_push($errors, "First name must not contain numbers!");
+        }
+
+        if (!empty($lname) && preg_match('/[0-9]/', $lname)) {
+            array_push($errors, "Last name must not contain numbers!");
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            array_push($errors, "Email is not valid!");
+        }
+
+        if (strlen($password) < 8) {
+            array_push($errors, "Password must be at least 8 characters long!");
+        }
+
+        if ($role != 'teacher' && $role != 'student') {
+            array_push($errors, "Please select a valid role!");
+        }
+        
+        // If no errors, proceed with registration
+        if (empty($errors)) {
+            $hashed_password = password_hash($password, PASSWORD_BCRYPT);
+
+            $stmt = $conn->prepare("INSERT INTO users (fname, lname, email, password, role) VALUES (?, ?, ?, ?, ?)");
+            $stmt->bind_param("sssss", $fname, $lname, $email, $hashed_password, $role);
+
+            if ($stmt->execute()) {
+                echo "<div class='alert alert-success custom-alert'>New account created successfully</div>";
+                
+                // Redirect based on role
+                if ($role == 'student') {
+                    header("Location: students_auth.html");
+                } else {
+                    header("Location: teachers_auth.html");
+                } 
+                exit(); 
             } else {
-                header("Location: teachers_auth.html");
-            } 
-            exit(); 
-        } else {
-            echo "<div class='alert alert-danger'>Error: " . $stmt->error . "</div>";
+                array_push($errors, "Error: " . $stmt->error);
+            }
         }
-
-        $stmt->close();
-        $conn->close();
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -125,140 +134,128 @@ if (isset($_POST["submit"])) {
   <link href="../assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
   <link href="../assets/vendor/aos/aos.css" rel="stylesheet">
 
-  
   <link href="../assets/css/main.css" rel="stylesheet">
   <link href="../assets/css/style.css" rel="stylesheet">
   <link href="../assets/css/createacc.css" rel="stylesheet">
-  
-  
- 
 </head>
 
 <body class="index-page" data-bs-spy="scroll" data-bs-target="#navmenu">
 
     <header id="header" class="header fixed-top d-flex align-items-center">
-        <div class="container-fluid d-flex align-items-center justify-content-between">
+    <div class="container-fluid d-flex align-items-center justify-content-between">
     
-          <a href="../index.html" class="logo d-flex align-items-center me-auto me-xl-0">
-             <div class="mylogo">
-            <i class="fas fa-book-open" style="color: #f44336; font-size: 40px; "></i>
-            <h6 id="myHeading" style="font-size: 30px; color: black;">ImBoni</h6>
-    
-           </div>
-          </a>
-    
-          <nav id="navmenu" class="navmenu">
-            <ul>
-              <li><a href="../index.html#hero" class="active" style="color: black;">Home</a></li>
-              <li><a href="../about.html" style="color: black;">About</a></li>
-              <li><a href="../pricing.html" style="color: black;">Pricing</a></li>
-              <li><a href="../prof.html" style="color: black;">Professors</a></li>
-              <li><a href="../team.html" style="color: black;">Team</a></li>
-              <li><a href="../services.html" style="color: black;">Services</a></li>
-              <li class="dropdown has-dropdown"><a href="../blogpage.html"><span style="color: black;">Blog</span> <i class="bi bi-chevron-down"></i></a>
-                <ul class="dd-box-shadow">
-                  <li><a href="../blogpage.html" style="color: black;">Current Areas</a></li>
-                  <li><a href="../blog.html" style="color: black;">All Blogs</a></li>
-                  <li><a href="#" style="color: black;">View Posts</a></li>
+    <a href="../index.html" class="logo d-flex align-items-center me-auto me-xl-0">
+       <div class="mylogo">
+      <i class="fas fa-book-open" style="color: #f44336; font-size: 40px; "></i>
+      <h6 id="myHeading" style="font-size: 30px; color: black;">ImBoni</h6>
+
+     </div>
+    </a>
+
+    <nav id="navmenu" class="navmenu">
+      <ul>
+        <li><a href="../index.html#hero" class="active" style="color: black;">Home</a></li>
+        <li><a href="../about.html" style="color: black;">About</a></li>
+        <li><a href="../pricing.html" style="color: black;">Pricing</a></li>
+        <li><a href="../prof.html" style="color: black;">Professors</a></li>
+        <li><a href="../team.html" style="color: black;">Team</a></li>
+        <li><a href="../services.html" style="color: black;">Services</a></li>
+        <li class="dropdown has-dropdown"><a href="../blogpage.html"><span style="color: black;">Blog</span> <i class="bi bi-chevron-down"></i></a>
+          <ul class="dd-box-shadow">
+            <li><a href="../blogpage.html" style="color: black;">Current Areas</a></li>
+            <li><a href="../blog.html" style="color: black;">All Blogs</a></li>
+            <li><a href="#" style="color: black;">View Posts</a></li>
+           
+      </ul>
+      <li><a href="../contact.html" style="color: black;">Contact</a></li>
+      <li class="dropdown has-dropdown"><a href="#"><span style="color: black;">Language</span> <i class="bi bi-chevron-down"></i></a>
+        <ul class="dd-box-shadow">
+          <li><a href="#">Kinyarwanda</a></li>
+          <li><a href="#">English</a></li>
+          <li><a href="#">French</a></li>
+          <li><a href="#">Kiswahili</a></li>
+    </ul>
+   
+    </nav>
+    <i class="mobile-nav-toggle d-xl-none bi bi-list" style="color: black;"></i>
+    <a class="btn-getstarted" href="../forms/login&register.php">Log In !</a>
+
+  </div>
+    </header>
+
+    <main id="ishimwe-main">
+        <div class="ishimwe-container" id="ishimwe-container">
+            <div class="ishimwe-form-container ishimwe-sign-up">
+                <form id="signupForm" action="createacc.php" method="post">
+                    <h1>Create Account</h1>
+                    <div class="ishimwe-social-icons">
+                        <a href="#" class="icon"><i class="fab fa-google-plus-g"></i></a>
+                        <a href="#" class="icon"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="icon"><i class="fab fa-github"></i></a>
+                        <a href="#" class="icon"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                    <span>or use your email for registration</span>
+                    <?php
+                    if (isset($errors) && !empty($errors)) {
+                        foreach ($errors as $error) {
+                            echo "<div class='alert alert-danger custom-alert'>$error</div>";
+                        }
+                    }
+                    ?>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" placeholder="First Name" name="fname">
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" placeholder="Last Name" name="lname">
+                        </div>
+                    </div>
+                    <input type="email" class="form-control" placeholder="Email" name="email" required>
+                    <input type="password" class="form-control" placeholder="Password" name="password" required>
+                    <select id="roleSelect" class="form-control" name="role" required style="background-color: #eee; cursor: pointer;">
+                        <option value="" disabled selected>Select your role</option>
+                        <option value="teacher">Teacher</option>
+                        <option value="student">Student</option>
+                    </select>
+                    <button type="submit" style="width: 100%;" name="submit">Sign Up</button>
+                </form>
+            </div>
+            <div class="ishimwe-form-container ishimwe-sign-in">
+                <form id="ishimwe-signInForm" action="createacc.php" method="POST">
+                    <h1>Sign In</h1>
+                    <div class="ishimwe-social-icons">
+                        <a href="#" class="icon"><i class="fa-brands fa-google-plus-g"></i></a>
+                        <a href="#" class="icon"><i class="fa-brands fa-facebook-f"></i></a>
+                        <a href="#" class="icon"><i class="fa-brands fa-github"></i></a>
+                        <a href="#" class="icon"><i class="fa-brands fa-linkedin-in"></i></a>
+                    </div>
+                    <span>or use your email and password</span>
                  
-            </ul>
-            <li><a href="../contact.html" style="color: black;">Contact</a></li>
-            <li class="dropdown has-dropdown"><a href="#"><span style="color: black;">Language</span> <i class="bi bi-chevron-down"></i></a>
-              <ul class="dd-box-shadow">
-                <li><a href="#">Kinyarwanda</a></li>
-                <li><a href="#">English</a></li>
-                <li><a href="#">French</a></li>
-                <li><a href="#">Kiswahili</a></li>
-          </ul>
-         
-          </nav>
-          <i class="mobile-nav-toggle d-xl-none bi bi-list" style="color: black;"></i>
-          <a class="btn-getstarted" href="../forms/login&register.html">Log In !</a>
-    
-        </div>
-      </header>
-  <main id="ishimwe-main">
-  
-    <div class="ishimwe-container" id="ishimwe-container">
-        <div class="ishimwe-form-container ishimwe-sign-up">
-            <form id="signupForm" action="createacc.php" method="post">
-                <h1>Create Account</h1>
-                <div class="ishimwe-social-icons">
-                    <a href="#" class="icon"><i class="fab fa-google-plus-g"></i></a>
-                    <a href="#" class="icon"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" class="icon"><i class="fab fa-github"></i></a>
-                    <a href="#" class="icon"><i class="fab fa-linkedin-in"></i></a>
-                </div>
-                <span>or use your email for registration</span>
-                <div class="row">
-                    <div class="col-md-6">
-                        <input type="text" class="form-control" placeholder="First Name" name="fname" >
+                    <input type="email" placeholder="Email" name="email" required>
+                    <input type="password" placeholder="Password" name="password" required>
+                    <a href="#">Forgot your password?</a>
+                    <button type="submit" style="width: 100%;" name="submit">Sign In</button>
+                </form>
+            </div>
+            <div class="ishimwe-toggle-container">
+                <div class="ishimwe-toggle">
+                    <div class="ishimwe-toggle-panel ishimwe-toggle-left">
+                        <h1 style="color: #fff;">Welcome Back!</h1>
+                        <p>Enter your personal details to use all of site features and get satisfied while using IMBONI </p>
+                        <p>Don't have an account?</p>
+                        <button class="ishimwe-hidden" id="ishimwe-login">Sign Up</button>
                     </div>
-                    <div class="col-md-6">
-                        <input type="text" class="form-control" placeholder="Last Name" name="lname" >
+                    <div class="ishimwe-toggle-panel ishimwe-toggle-right">
+                        <h1 style="color: #fff;">Work to succeed!</h1>
+                        <p>Register with your personal details to use all of site features and keep your continuous growth through process. </p>
+                        <p>Already have an account?</p>
+                        <button class="ishimwe-hidden" id="ishimwe-register">Sign In</button>
                     </div>
-                </div>
-                <input type="email" class="form-control" placeholder="Email" name="email">
-                <input type="password" class="form-control" placeholder="Password" name="password" >
-              <select id="roleSelect" class="form-control" name="role" required style="background-color: #eee; cursor: pointer;">
-    <option value="" disabled selected>Select your role</option>
-    <option value="teacher">Teacher</option>
-    <option value="student">Student</option>
-</select>
-                <button type="submit" style="width: 100%;" name="submit">Sign Up</button>
-            </form>
-            
-        </div>
-        <div class="ishimwe-form-container ishimwe-sign-in">
-            <form id="ishimwe-signUpForm">
-                <h1>Create count</h1>
-                <div class="ishimwe-social-icons">
-                    <a href="#" class="icon"><i class="fa-brands fa-google-plus-g"></i></a>
-                    <a href="#" class="icon"><i class="fa-brands fa-facebook-f"></i></a>
-                    <a href="#" class="icon"><i class="fa-brands fa-github"></i></a>
-                    <a href="#" class="icon"><i class="fa-brands fa-linkedin-in"></i></a>
-                </div>
-                <span>or use your email for registration</span>
-                <input type="text" placeholder="Ne" required>
-                <input type="email" placeholder="Email" required>
-                <input type="password" placeholder="Password" required>
-                <button type="submit">Sign Up</button>
-            </form>
-        </div>
-        <div class="ishimwe-form-container ishimwe-sign-in">
-            <form id="ishimwe-signInForm" action="login.php" method="POST">
-                <h1>Sign In</h1>
-                <div class="ishimwe-social-icons">
-                    <a href="#" class="icon"><i class="fa-brands fa-google-plus-g"></i></a>
-                    <a href="#" class="icon"><i class="fa-brands fa-facebook-f"></i></a>
-                    <a href="#" class="icon"><i class="fa-brands fa-github"></i></a>
-                    <a href="#" class="icon"><i class="fa-brands fa-linkedin-in"></i></a>
-                </div>
-                <span>or use your email password</span>
-                <input type="email" placeholder="Email" required>
-                <input type="password" placeholder="Password" required>
-                <a href="#">Forgot your password?</a>
-                <button type="submit" style="width: 100%;">Sign In</button>
-            </form>
-        </div>
-        <div class="ishimwe-toggle-container">
-            <div class="ishimwe-toggle">
-                <div class="ishimwe-toggle-panel ishimwe-toggle-left">
-                    <h1 style="color: #fff;">Welcome Back!</h1>
-                    <p>Enter your personal details to use all of site features and get satisfies while using IMBONI </p>
-                    <p>Already have an account?</p>
-                    <button class="ishimwe-hidden" id="ishimwe-login">Sign In</button>
-                </div>
-                <div class="ishimwe-toggle-panel ishimwe-toggle-right">
-                    <h1 style="color: #fff;">Work to succeed!</h1>
-                    <p>Register with your personal details to use all of site features and keep your continuous growth through process. </p>
-                    <p>You have no account?</p>
-                    <button class="ishimwe-hidden" id="ishimwe-register">Sign Up</button>
                 </div>
             </div>
         </div>
-    </div>
-</main>
+    </main>
+
 
  
 <footer id="footer" class="footer">

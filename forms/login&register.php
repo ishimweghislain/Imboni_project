@@ -1,3 +1,103 @@
+<?php
+ob_start(); 
+$redirect_url = '';
+
+if (isset($_POST["submit"])) {
+    $email = isset($_POST["email"]) ? $_POST["email"] : '';
+    $password = isset($_POST["password"]) ? $_POST["password"] : '';
+    $role = isset($_POST["role"]) ? $_POST["role"] : '';
+
+    $errors = array();
+
+    if (!isset($_POST["fname"])) {
+        if (empty($email) || empty($password)) {
+            array_push($errors, "Please fill in all fields!");
+        }
+
+        if (empty($errors)) {
+            require_once "db.php";
+
+            $sql = "SELECT * FROM users WHERE email = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("s", $email);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $user = $result->fetch_assoc();
+
+            if ($user && password_verify($password, $user['password'])) {
+                if ($user['role'] == 'teacher') {
+                    header("Location: ../tchers_dashboard/tdash.html");
+                } elseif ($user['role'] == 'student') {
+                    header("Location: ../stdents_dashboard/stdash.html");
+                }
+                exit();
+            } else {
+                array_push($errors, "Invalid email or password. Please put correct credentials !");
+            }
+        }
+    } else {
+        $fname = isset($_POST["fname"]) ? $_POST["fname"] : '';
+        $lname = isset($_POST["lname"]) ? $_POST["lname"] : '';
+
+        if (empty($fname) || empty($lname) || empty($email) || empty($password) || empty($role)) {
+            array_push($errors, "Please all fields are required !");
+        }
+
+        require_once "db.php";
+
+        $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $rowcount = $result->num_rows;
+
+        if ($rowcount > 0) {
+            array_push($errors, "Email has been used, use another email!");
+        }
+
+        if (!empty($fname) && preg_match('/[0-9]/', $fname)) {
+            array_push($errors, "First name must not contain numbers!");
+        }
+
+        if (!empty($lname) && preg_match('/[0-9]/', $lname)) {
+            array_push($errors, "Last name must not contain numbers!");
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            array_push($errors, "Email is not valid!");
+        }
+
+        if (strlen($password) < 8) {
+            array_push($errors, "Password must be at least 8 characters long!");
+        }
+
+        if ($role != 'teacher' && $role != 'student') {
+            array_push($errors, "Please select a valid role!");
+        }
+        
+        if (empty($errors)) {
+            $hashed_password = password_hash($password, PASSWORD_BCRYPT);
+
+            $stmt = $conn->prepare("INSERT INTO users (fname, lname, email, password, role) VALUES (?, ?, ?, ?, ?)");
+            $stmt->bind_param("sssss", $fname, $lname, $email, $hashed_password, $role);
+
+            if ($stmt->execute()) {
+                echo "<div class='alert alert-success custom-alert'>New account created successfully</div>";
+                
+                if ($role == 'student') {
+                    header("Location: students_auth.html");
+                } else {
+                    header("Location: teachers_auth.html");
+                } 
+                exit(); 
+            } else {
+                array_push($errors, "Error: " . $stmt->error);
+            }
+        }
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -9,31 +109,24 @@
   <meta content="" name="description">
   <meta content="" name="keywords">
 
-  <!-- Favicons -->
   <link href="../assets/img/favicon.png" rel="icon">
   <link href="../assets/img/apple-touch-icon.png" rel="apple-touch-icon">
 
-  <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
 
-  <!-- Vendor CSS Files -->
   <link href="../assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <link href="../assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
   <link href="../assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
   <link href="../assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
   <link href="../assets/vendor/aos/aos.css" rel="stylesheet">
 
-  
   <link href="../assets/css/main.css" rel="stylesheet">
   <link href="../assets/css/style.css" rel="stylesheet">
   <link href="../assets/css/login.css" rel="stylesheet">
- 
-  
- 
 </head>
 
 <body class="index-page" data-bs-spy="scroll" data-bs-target="#navmenu">
@@ -62,27 +155,61 @@
                   <li><a href="../blogpage.html" style="color: black;">Current Areas</a></li>
                   <li><a href="../blog.html" style="color: black;">All Blogs</a></li>
                   <li><a href="#" style="color: black;">View Posts</a></li>
-                 
+                </ul>
+              </li>
+              <li><a href="../contact.html" style="color: black;">Contact</a></li>
+              <li class="dropdown has-dropdown"><a href="#"><span style="color: black;">Language</span> <i class="bi bi-chevron-down"></i></a>
+                <ul class="dd-box-shadow">
+                  <li><a href="#">Kinyarwanda</a></li>
+                  <li><a href="#">English</a></li>
+                  <li><a href="#">French</a></li>
+                  <li><a href="#">Kiswahili</a></li>
+                </ul>
+              </li>
             </ul>
-            <li><a href="../contact.html" style="color: black;">Contact</a></li>
-            <li class="dropdown has-dropdown"><a href="#"><span style="color: black;">Language</span> <i class="bi bi-chevron-down"></i></a>
-              <ul class="dd-box-shadow">
-                <li><a href="#">Kinyarwanda</a></li>
-                <li><a href="#">English</a></li>
-                <li><a href="#">French</a></li>
-                <li><a href="#">Kiswahili</a></li>
-          </ul>
-           
           </nav>
           <i class="mobile-nav-toggle d-xl-none bi bi-list" style="color: black;"></i>
-          <a class="btn-getstarted" href="../forms/login&register.html">Log In !</a>
+          <a class="btn-getstarted" href="../forms/login&register.php">Log In !</a>
     
         </div>
-      </header><!-- End Header -->
+      </header>
   <main id="ishimwe-main">
     <div class="ishimwe-container" id="ishimwe-container">
+        <div class="ishimwe-form-container ishimwe-sign-in">
+            <form id="ishimwe-signInForm" action="login&register.php" method="POST">
+                <h1>Sign In</h1>
+                <div class="ishimwe-social-icons">
+                    <a href="#" class="icon"><i class="fa-brands fa-google-plus-g"></i></a>
+                    <a href="#" class="icon"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="#" class="icon"><i class="fa-brands fa-github"></i></a>
+                    <a href="#" class="icon"><i class="fa-brands fa-linkedin-in"></i></a>
+                </div>
+                <?php
+if (isset($errors) && !empty($errors)) {
+    foreach ($errors as $error) {
+        echo "<div class='alert alert-danger' style='
+              top : 80px;
+   position: fixed;
+   left : 10px;
+   width: 150px;
+   font-size:10px;
+   height:70px; 
+                '>
+                $error
+            </div>";
+    }
+}
+?>
+
+                <span>or use your email password</span>
+                <input type="email" class="form-control" placeholder="Email" name="email">
+                <input type="password" class="form-control" placeholder="Password" name="password">
+                <a href="#">Forgot your password?</a>
+                <button type="submit" style="width: 100%;" name="submit">Sign In</button>
+            </form>
+        </div>
         <div class="ishimwe-form-container ishimwe-sign-up">
-            <form id="signupForm">
+            <form id="signupForm" action="login&register.php" method="POST">
                 <h1>Create Account</h1>
                 <div class="ishimwe-social-icons">
                     <a href="#" class="icon"><i class="fab fa-google-plus-g"></i></a>
@@ -91,51 +218,23 @@
                     <a href="#" class="icon"><i class="fab fa-linkedin-in"></i></a>
                 </div>
                 <span>or use your email for registration</span>
+            
                 <div class="row">
                     <div class="col-md-6">
-                        <input type="text" class="form-control" placeholder="First Name" required>
+                        <input type="text" class="form-control" placeholder="First Name" name="fname">
                     </div>
                     <div class="col-md-6">
-                        <input type="text" class="form-control" placeholder="Last Name" required>
+                        <input type="text" class="form-control" placeholder="Last Name" name="lname">
                     </div>
                 </div>
-                <input type="email" class="form-control" placeholder="Email" required>
-                <input type="password" class="form-control" placeholder="Password" required>
-                <select id="roleSelect" class="form-control" required style="background-color: #eee; cursor: pointer;">
+                <input type="email" class="form-control" placeholder="Email" name="email">
+                <input type="password" class="form-control" placeholder="Password" name="password">
+                <select id="roleSelect" class="form-control" name="role" required style="background-color: #eee; cursor: pointer;">
                     <option value="" disabled selected>Select your role</option>
                     <option value="teacher">Teacher</option>
                     <option value="student">Student</option>
                 </select>
-                <button type="submit" style="width: 100%;">Sign Up</button>
-            </form>
-        </div>
-        <div class="ishimwe-form-container ishimwe-sign-in">
-            <form id="ishimwe-signUpForm">
-                <h1>Create Account</h1>
-                <div class="ishimwe-social-icons">
-                    <a href="#" class="icon"><i class="fa-brands fa-google-plus-g"></i></a>
-                    <a href="#" class="icon"><i class="fa-brands fa-facebook-f"></i></a>
-                    <a href="#" class="icon"><i class="fa-brands fa-github"></i></a>
-                    <a href="#" class="icon"><i class="fa-brands fa-linkedin-in"></i></a>
-                </div>
-               
-           
-            </form>
-        </div>
-        <div class="ishimwe-form-container ishimwe-sign-in">
-            <form id="ishimwe-signInForm">
-                <h1>Sign In</h1>
-                <div class="ishimwe-social-icons">
-                    <a href="#" class="icon"><i class="fa-brands fa-google-plus-g"></i></a>
-                    <a href="#" class="icon"><i class="fa-brands fa-facebook-f"></i></a>
-                    <a href="#" class="icon"><i class="fa-brands fa-github"></i></a>
-                    <a href="#" class="icon"><i class="fa-brands fa-linkedin-in"></i></a>
-                </div>
-                <span>or use your email password</span>
-                <input type="email"  class="form-control" placeholder="Email" required>
-                <input type="password"  class="form-control" placeholder="Password" required>
-                <a href="#">Forgot your password?</a>
-                <button type="submit" style="width: 100%;">Sign In</button>
+                <button type="submit" style="width: 100%;" name="submit">Sign Up</button>
             </form>
         </div>
         <div class="ishimwe-toggle-container">
@@ -143,23 +242,17 @@
                 <div class="ishimwe-toggle-panel ishimwe-toggle-left">
                     <h1 style="color: white;">Welcome Back!</h1>
                     <p>Enter your personal details to use all of site features and get satisfies while using IMBONI </p>
-                    <p>Already have an account?</p>
                     <button class="ishimwe-hidden" id="ishimwe-login">Sign In</button>
                 </div>
                 <div class="ishimwe-toggle-panel ishimwe-toggle-right">
                     <h1 style="color: #fff;">Work to succeed!</h1>
                     <p>Register with your personal details to use all of site features and keep your continuous growth through process. </p>
-                    <p>You have no account?</p>
                     <button class="ishimwe-hidden" id="ishimwe-register">Sign Up</button>
                 </div>
             </div>
         </div>
     </div>
 </main>
-
-
-   
-
 
 <footer id="footer" class="footer">
 
@@ -247,23 +340,7 @@
         });
     });
 
-    // check if it is teacher or student the direct u to the right path
-    document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('signupForm');
-    const roleSelect = document.getElementById('roleSelect');
-
-    form.addEventListener('submit', function(event) {
-        event.preventDefault(); // Prevent default form submission behavior
-
-        const selectedRole = roleSelect.value;
-        if (selectedRole === 'teacher') {
-            window.location.href = '../forms/teachers_auth.html'; // Redirect to teachers_auth.html
-        } else if (selectedRole === 'student') {
-            window.location.href = '../forms/students_auth.html'; // Redirect to students_auth.html
-        }
-        // You can add more conditions for other roles if needed
-    });
-});
+  
     </script>
   <script src="../assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="../assets/vendor/glightbox/js/glightbox.min.js"></script>

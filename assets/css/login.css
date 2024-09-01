@@ -200,3 +200,22 @@ body{
 .ishimwe-container.ishimwe-active .ishimwe-toggle-right{
     transform: translateX(200);
 }
+.error-container {
+    position: relative;  /* Adjusts based on its parent */
+    margin: 200px auto;   /* Centers it within its parent element */
+    max-width: 600px;    /* Limit width to 600px or as needed */
+    padding: 10px;       /* Some padding around the container */
+}
+
+/* Style for the alert message */
+.custom-alert {
+    color: #fff;               /* White text color */
+    background-color: #f44336; /* Red background for error */
+    border-radius: 5px;        /* Rounded corners */
+    padding: 10px 20px;        /* Padding around the text */
+    margin: 10px 0;            /* Space between each error message */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Light shadow for depth */
+    font-size: 106px;           
+}
+
+    
